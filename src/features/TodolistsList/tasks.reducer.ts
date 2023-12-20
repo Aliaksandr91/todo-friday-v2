@@ -63,7 +63,10 @@ const slice = createSlice({
 
 // thunks
 
-const fetchTasks = createAsyncThunk('tasks/fetchTasks', async (todolistId: string, thunkAPI) => {
+const fetchTasks = createAsyncThunk<{
+    tasks: TaskType[],
+    todolistId: string,
+}, string>('tasks/fetchTasks', async (todolistId, thunkAPI) => {
     const {dispatch, rejectWithValue} = thunkAPI
     try {
         dispatch(appActions.setAppStatus({status: "loading"}));
@@ -71,8 +74,9 @@ const fetchTasks = createAsyncThunk('tasks/fetchTasks', async (todolistId: strin
         const tasks = res.data.items;
         dispatch(appActions.setAppStatus({status: "succeeded"}));
         return {tasks, todolistId}
-    } catch (err) {
-        return rejectWithValue('ERROR')
+    } catch (err: any) {
+        handleServerNetworkError(err, dispatch)
+        return rejectWithValue(null)
     }
 
 })
