@@ -96,21 +96,24 @@ const addTask = createAppAsyncThunk<{ task: TaskType }, {
         return rejectWithValue(null)
     }
 })
-export type UpdateTaskArgsType = {
+export type UpdateTaskArgType = {
     taskId: string,
     domainModel: UpdateDomainTaskModelType,
     todolistId: string
 }
-const updateTask = createAppAsyncThunk<UpdateTaskArgsType, UpdateTaskArgsType>(`${slice.name}/updateTask`, async (arg, thunkAPI) => {
+
+const updateTask = createAppAsyncThunk<UpdateTaskArgType, UpdateTaskArgType>
+(`${slice.name}/updateTask`, async (arg, thunkAPI) => {
     const {dispatch, rejectWithValue, getState} = thunkAPI
     try {
-        const state = getState();
-        const task = state.tasks[arg.todolistId].find((t) => t.id === arg.taskId);
+        dispatch(appActions.setAppStatus({status: 'loading'}))
+        const state = getState()
+        const task = state.tasks[arg.todolistId].find(t => t.id === arg.taskId)
         if (!task) {
-            //throw new Error("task not found in the state");
-            console.warn("task not found in the state");
+            dispatch(appActions.setAppError({error: 'Task not found'}))
             return rejectWithValue(null)
         }
+
         const apiModel: UpdateTaskModelType = {
             deadline: task.deadline,
             description: task.description,
@@ -118,23 +121,22 @@ const updateTask = createAppAsyncThunk<UpdateTaskArgsType, UpdateTaskArgsType>(`
             startDate: task.startDate,
             title: task.title,
             status: task.status,
-            ...arg.domainModel,
-        };
-        const res = await todolistsAPI
-            .updateTask(arg.todolistId, arg.taskId, apiModel)
+            ...arg.domainModel
+        }
+
+        const res = await todolistsAPI.updateTask(arg.todolistId, arg.taskId, apiModel)
         if (res.data.resultCode === 0) {
+            dispatch(appActions.setAppStatus({status: 'succeeded'}))
             return arg
         } else {
             handleServerAppError(res.data, dispatch);
             return rejectWithValue(null)
         }
-
-    } catch (err) {
-        handleServerNetworkError(err, dispatch)
+    } catch (e) {
+        handleServerNetworkError(e, dispatch)
         return rejectWithValue(null)
     }
 })
-
 
 export const removeTaskTC =
     (taskId: string, todolistId: string): AppThunk =>
