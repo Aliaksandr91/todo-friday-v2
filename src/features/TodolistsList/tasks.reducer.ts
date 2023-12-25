@@ -73,6 +73,17 @@ const fetchTasks = createAppAsyncThunk<{
     }
 
 })
+// export const ResultCode = {
+//     success: 0,
+//     error: 1,
+//     captcha: 10
+// } as const
+
+enum ResultCode {
+    success = 0,
+    error = 1,
+    captcha = 10
+}
 
 const addTask = createAppAsyncThunk<{ task: TaskType }, {
     title: string,
@@ -83,7 +94,7 @@ const addTask = createAppAsyncThunk<{ task: TaskType }, {
         dispatch(appActions.setAppStatus({status: "loading"}));
         const res = await todolistsAPI
             .createTask(arg.todolistId, arg.title)
-        if (res.data.resultCode === 0) {
+        if (res.data.resultCode === ResultCode.success) {
             const task = res.data.data.item;
             dispatch(appActions.setAppStatus({status: "succeeded"}));
             return {task}
