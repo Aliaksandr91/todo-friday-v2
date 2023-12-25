@@ -73,17 +73,12 @@ const fetchTasks = createAppAsyncThunk<{
     }
 
 })
-// export const ResultCode = {
-//     success: 0,
-//     error: 1,
-//     captcha: 10
-// } as const
 
-enum ResultCode {
-    success = 0,
-    error = 1,
-    captcha = 10
-}
+export const ResultCode = {
+    success: 0,
+    error: 1,
+    captcha: 10
+} as const
 
 const addTask = createAppAsyncThunk<{ task: TaskType }, {
     title: string,
